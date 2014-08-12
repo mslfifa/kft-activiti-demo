@@ -93,6 +93,6 @@
     <url-pattern>/rest/*</url-pattern>
   </servlet-mapping>
   <session-config>
-    <session-timeout>20</session-timeout>
+    <session-timeout>0</session-timeout>
   </session-config>
 </web-app>

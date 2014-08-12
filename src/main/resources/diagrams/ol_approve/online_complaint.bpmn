@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="http://www.activiti.org/test">
+  <process id="complain_process" name="投诉流程管理" isExecutable="true">
+    <startEvent id="startevent1" name="Start">
+      <extensionElements>
+        <activiti:formProperty id="bus_id" name="业务主键" type="string" variable="var_bus_id" required="true"></activiti:formProperty>
+        <activiti:formProperty id="bus_type" name="业务类型" type="string" variable="var_bus_type" required="true"></activiti:formProperty>
+        <activiti:formProperty id="drafter_id" name="起草人ID" type="string" variable="var_drafter_id" required="true"></activiti:formProperty>
+        <activiti:executionListener event="end" class="me.kafeitu.demo.activiti.listener.BusProcessOnEndListener"></activiti:executionListener>
+      </extensionElements>
+    </startEvent>
+    <userTask id="resource_audit" name="审核材料" activiti:assignee="deptLeader">
+      <extensionElements>
+        <activiti:taskListener event="complete" class="me.kafeitu.demo.activiti.listener.BusProcessOnEndListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow1" sourceRef="startevent1" targetRef="resource_audit"></sequenceFlow>
+    <exclusiveGateway id="is_condition_to_accept" name="是否符合受理条件">
+      <documentation>是否满足受理条件，由人工去判断提交的业务表单数据</documentation>
+    </exclusiveGateway>
+    <sequenceFlow id="flow3" sourceRef="resource_audit" targetRef="is_condition_to_accept"></sequenceFlow>
+    <userTask id="fill_accept_result" name="填写调查结果" activiti:assignee="hr">
+      <documentation>人事专员填写详细的审核结果</documentation>
+      <extensionElements>
+        <activiti:formProperty id="audit_suggestion" name="suggestion" type="string" variable="var_suggestion"></activiti:formProperty>
+        <activiti:taskListener event="complete" class="me.kafeitu.demo.activiti.listener.BusProcessOnEndListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow4" sourceRef="is_condition_to_accept" targetRef="fill_accept_result">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${approve}]]></conditionExpression>
+    </sequenceFlow>
+    <userTask id="adjust_complain" name="起草人重新调整投诉">
+      <extensionElements>
+        <activiti:taskListener event="complete" class="me.kafeitu.demo.activiti.listener.BusProcessOnEndListener"></activiti:taskListener>
+      </extensionElements>
+    </userTask>
+    <sequenceFlow id="flow5" sourceRef="is_condition_to_accept" targetRef="adjust_complain">
+      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${!approve}]]></conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="flow6" sourceRef="adjust_complain" targetRef="resource_audit"></sequenceFlow>
+    <endEvent id="endevent1" name="End"></endEvent>
+    <sequenceFlow id="flow7" sourceRef="fill_accept_result" targetRef="endevent1"></sequenceFlow>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_myProcess">
+    <bpmndi:BPMNPlane bpmnElement="myProcess" id="BPMNPlane_myProcess">
+      <bpmndi:BPMNShape bpmnElement="startevent1" id="BPMNShape_startevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="250.0" y="280.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="resource_audit" id="BPMNShape_resource_audit">
+        <omgdc:Bounds height="55.0" width="105.0" x="330.0" y="270.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="is_condition_to_accept" id="BPMNShape_is_condition_to_accept">
+        <omgdc:Bounds height="40.0" width="40.0" x="550.0" y="277.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="fill_accept_result" id="BPMNShape_fill_accept_result">
+        <omgdc:Bounds height="55.0" width="105.0" x="700.0" y="271.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="adjust_complain" id="BPMNShape_adjust_complain">
+        <omgdc:Bounds height="55.0" width="105.0" x="518.0" y="450.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape bpmnElement="endevent1" id="BPMNShape_endevent1">
+        <omgdc:Bounds height="35.0" width="35.0" x="890.0" y="280.0"></omgdc:Bounds>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge bpmnElement="flow1" id="BPMNEdge_flow1">
+        <omgdi:waypoint x="285.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="330.0" y="297.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow3" id="BPMNEdge_flow3">
+        <omgdi:waypoint x="435.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="550.0" y="297.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow4" id="BPMNEdge_flow4">
+        <omgdi:waypoint x="590.0" y="297.0"></omgdi:waypoint>
+        <omgdi:waypoint x="700.0" y="298.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow5" id="BPMNEdge_flow5">
+        <omgdi:waypoint x="570.0" y="317.0"></omgdi:waypoint>
+        <omgdi:waypoint x="570.0" y="450.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow6" id="BPMNEdge_flow6">
+        <omgdi:waypoint x="570.0" y="450.0"></omgdi:waypoint>
+        <omgdi:waypoint x="382.0" y="325.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge bpmnElement="flow7" id="BPMNEdge_flow7">
+        <omgdi:waypoint x="805.0" y="298.0"></omgdi:waypoint>
+        <omgdi:waypoint x="890.0" y="297.0"></omgdi:waypoint>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>
